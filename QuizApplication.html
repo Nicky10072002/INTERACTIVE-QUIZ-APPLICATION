@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #6234ed89;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .quiz-container {
+            background: #b0cef6;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 4, 210, 0.695);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .heading{
+            border: 2px solid antiquewhite;
+            background-color: antiquewhite;
+            border-radius: 10px;
+            font-style: oblique;
+            font-size: 1.1em;
+        }
+        .question {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        }
+        .answers {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+        .btn:hover {
+            background-color: #2424e9;
+            color: antiquewhite;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-size: 1em;
+        }
+        .score, .timer {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .timer {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="quiz-container">
+        <div class="heading"><h3>GK QUIZ</h3></div>
+        <div id="quiz">
+            <div class="timer" id="timer">Time left: 30s</div> <br>
+            <div class="question" id="question">Loading question...</div>
+            <div class="answers" id="answers"></div>
+            <div class="feedback" id="feedback"></div>
+        </div>
+        <div class="score" id="score" style="display: none;"></div> <br>
+        <button class="btn" id="next-btn" style="display: none;">Next Question</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the capital of France?",
+                options: ["Berlin", "Madrid", "Paris", "Rome"],
+                correct: 2
+            },
+            {
+                question: "What is 2 + 2?",
+                options: ["3", "4", "5", "6"],
+                correct: 1
+            },
+            {
+                question: "Which language is used to style web pages?",
+                options: ["HTML", "CSS", "JavaScript", "Python"],
+                correct: 1
+            },
+            {
+                question: "What is the largest planet in our solar system?",
+                options: ["Earth", "Mars", "Jupiter", "Saturn"],
+                correct: 2
+            },
+            {
+                question: "What is the chemical symbol for water?",
+                options: ["O2", "H2O", "CO2", "NaCl"],
+                correct: 1
+            },
+            {
+                question: "Who wrote 'Hamlet'?",
+                options: ["Charles Dickens", "William Shakespeare", "Mark Twain", "Jane Austen"],
+                correct: 1
+            },
+            {
+                question: "What is the speed of light?",
+                options: ["300,000 km/s", "150,000 km/s", "450,000 km/s", "600,000 km/s"],
+                correct: 0
+            },
+            {
+                question: "What is the capital of Japan?",
+                options: ["Seoul", "Beijing", "Tokyo", "Bangkok"],
+                correct: 2
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Venus", "Mars", "Jupiter", "Mercury"],
+                correct: 1
+            },
+            {
+                question: "What is the smallest prime number?",
+                options: ["0", "1", "2", "3"],
+                correct: 2
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timerInterval;
+        let timeLeft = 30;
+
+        const questionEl = document.getElementById("question");
+        const answersEl = document.getElementById("answers");
+        const feedbackEl = document.getElementById("feedback");
+        const scoreEl = document.getElementById("score");
+        const timerEl = document.getElementById("timer");
+        const nextBtn = document.getElementById("next-btn");
+
+        function startTimer() {
+            timerEl.textContent = `Time left: ${timeLeft}s`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = `Time left: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    feedbackEl.textContent = "Time's up! Moving to the next question.";
+                    feedbackEl.style.color = "red";
+                    nextBtn.style.display = "block";
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 30;
+            startTimer();
+        }
+
+        function loadQuestion() {
+            resetTimer();
+            feedbackEl.textContent = "";
+            nextBtn.style.display = "none";
+            const currentQuestion = questions[currentQuestionIndex];
+            questionEl.textContent = currentQuestion.question;
+            answersEl.innerHTML = "";
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement("button");
+                button.textContent = option;
+                button.classList.add("btn");
+                button.onclick = () => checkAnswer(index);
+                answersEl.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedIndex) {
+            clearInterval(timerInterval);
+            const currentQuestion = questions[currentQuestionIndex];
+
+            if (selectedIndex === currentQuestion.correct) {
+                feedbackEl.textContent = "Correct!";
+                feedbackEl.style.color = "green";
+                feedbackEl.style.fontWeight = "bold";
+                feedbackEl.style.fontSize = "20px";
+                score++;
+            } else {
+                feedbackEl.textContent = `Wrong! The correct answer is ${currentQuestion.options[currentQuestion.correct]}.`;
+                feedbackEl.style.color = "red";
+                feedbackEl.style.fontWeight = "bold";
+            }
+
+            nextBtn.style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        function showScore() {
+            clearInterval(timerInterval);
+            questionEl.textContent = "Quiz Completed!";
+            answersEl.innerHTML = "";
+            feedbackEl.textContent = "";
+            scoreEl.textContent = `Your score: ${score} / ${questions.length}`;
+            scoreEl.style.display = "block";
+            timerEl.style.display = "none";
+            nextBtn.style.display = "none";
+        }
+
+        nextBtn.onclick = nextQuestion;
+        loadQuestion();
+    </script>
+</body>
+</html>
